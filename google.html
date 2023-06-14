@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.min.css" rel="stylesheet">
+  </head>
+  <body>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+
+      label {
+        margin-right: 10px;
+      }
+
+      input[type="text"] {
+        padding: 5px;
+      }
+
+      button {
+        padding: 8px 16px;
+        margin-right: 10px;
+      }
+
+      #table {
+        margin-top: 20px;
+      }
+      <style>
+      .button-container {
+        margin-bottom: 10px;
+      }
+
+      .search-container {
+        margin-bottom: 10px;
+      }
+
+      .search-container label {
+        margin-right: 5px;
+      }
+    
+    </style>
+  </head>
+  <body>
+    <div>
+      <button onclick="navigateToData1()">Data 1</button>
+      <button onclick="navigateToData2()">Data 2</button>
+      <button onclick="navigateToData3()">Data 3</button>
+      <button onclick="navigateToData4()">Data 4</button>
+      <button onclick="navigateToData5()">Data 5</button>
+      <button onclick="navigateToData6()">Data 6</button><br><br>
+    </div>
+
+    <div>
+      <label for="nameInput">Search by Name:</label>
+      <input type="text" id="nameInput" oninput="performSearch()" />
+
+      <label for="segmentInput">Search by Segment:</label>
+      <input type="text" id="segmentInput" oninput="performSearch()" />
+    </div>
+
+    <div id="table"></div>
+
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.0/dist/js/tabulator.min.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", pageLoad);
+
+      function pageLoad() {
+        loadData();
+        startAutoRefresh();
+      }
+
+      function loadData() {
+        google.script.run
+          .withSuccessHandler((jsData) => {        
+            var table = new Tabulator("#table", {
+              layout: "fitDataStretch",
+              height: 500,
+              data: jsData,
+              pagination: true,
+              paginationSize: 100,
+              columns: [
+                { title: "Name", field: "Name", frozen: true },
+                { title: "Segment", field: "Segment" },
+                { title: "Country", field: "Country" },
+                { title: "Product", field: "Product" },
+                { title: "Discount Band", field: "Discount Band" },
+                { title: "Units Sold", field: "Units Sold" },
+                { title: "Manufacturing Price", field: "Manufacturing Price" },
+                {
+                  title: "Link",
+                  field: "Link",
+                  formatter: function(cell, formatterParams, onRendered) {
+                    var name = cell.getData().Link;
+                    var link = cell.getValue();
+                    var linkElement = document.createElement("a");
+                    linkElement.href = link;
+                    linkElement.target = "_blank";
+                    linkElement.innerText = name;
+                    return linkElement;
+                  },
+                }
+              ],
+              persistentLayout: true,
+              frozenColumns: true
+            });
+            // window.table = table;
+            // Assign the table instance to a global variable for access in other functions
+            window.table = table;
+            
+          })
+          
+          .withFailureHandler((er) => {
+            console.log("Failed to load data:", er);
+          })
+          .getData();
+
+      }
+
+
+      function performSearch() {
+        var nameInput = document.getElementById("nameInput").value.toLowerCase();
+        var segmentInput = document.getElementById("segmentInput").value.toLowerCase();
+
+        table.setFilter([
+          { field: "Name", type: "like", value: nameInput },
+          { field: "Segment", type: "like", value: segmentInput }
+        ]);
+      }
+
+      function navigateToData1() {
+        window.open("https://example.com/data1", "_blank");
+      }
+
+      function navigateToData2() {
+        window.open("https://example.com/data2", "_blank");
+      }
+
+      function navigateToData3() {
+        window.open("https://example.com/data3", "_blank");
+      }
+      function navigateToData4() {
+        window.open("https://example.com/data1", "_blank");
+      }
+
+      function navigateToData5() {
+        window.open("https://example.com/data2", "_blank");
+      }
+
+      function navigateToData6() {
+        window.open("https://example.com/data3", "_blank");
+      }
+    </script>
+  </body>
+</html>
