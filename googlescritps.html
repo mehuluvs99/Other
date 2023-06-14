@@ -1,0 +1,83 @@
+<!-- index.html -->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.min.css" rel="stylesheet">
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.0/dist/js/tabulator.min.js"></script>
+    <style>
+      body {
+        padding: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <input type="text" id="segmentFilter" placeholder="Search by Segment">
+    <input type="text" id="countryFilter" placeholder="Search by Country">
+    <div id="ex-table"></div>
+    
+
+    <script>
+      var originalData;
+
+      google.script.run.withSuccessHandler(displayData).getDataFromSheet();
+
+      function displayData(data) {
+        originalData = data;
+
+        var table = new Tabulator("#ex-table", {
+          data: data,
+          // layout: "fitColumns",
+          columnHeaderVertAlign: "bottom", //align header contents to bottom of cell
+          columns: [
+            { title: "Name", field: "0", width: 160},
+            {
+              title: "Work Info",
+              columns: [
+                {title:"Segment", field:"1"},
+                {title:"Country", field:"2"},
+              ],
+            },
+            {
+              title: "Personal Info",
+              columns: [
+                {title:"Product", field:"3"},
+                {title:"Discount Band", field:"4"},
+              ],
+            },
+            {
+              title: "Info",
+              columns: [
+                {title:"Units Sold", field:"5"},
+                {title:"Manufacturing Price", field:"6"},
+              ],
+            }
+          ],
+        });
+
+        var segmentFilterInput = document.getElementById("segmentFilter");
+        segmentFilterInput.addEventListener("input", function (event) {
+          var filterValue = event.target.value;
+          table.setFilter("1", "like", filterValue);
+
+        });
+
+        var countryFilterInput = document.getElementById("countryFilter");
+        countryFilterInput.addEventListener("input", function (event) {
+          var filterValue = event.target.value;
+          table.setFilter("2", "like", filterValue);
+
+        });
+        // Auto Refresh
+        setInterval(function () {
+          google.script.run.withSuccessHandler(function (data) {
+            // table.setFilter("1", "like", segmentFilterInput.value);
+            // table.setFilter("2", "like", countryFilterInput.value);
+            table.setFilter(segmentFilter, segmentFilterValue);
+          }).getDataFromSheet();
+        }, 5000);
+      }
+    </script>
+  </body>
+</html>
