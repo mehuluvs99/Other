@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator_bootstrap5.min.css" rel="stylesheet">
+  </head>
+  <body>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 5px;
+      }
+      label {
+        margin-right: 10px;
+      }
+      input[type="text"] {
+        padding: 5px;
+      }
+      button {
+        padding: 8px 16px;
+        margin-right: 10px;
+      }
+      #table {
+        margin-top: 10px;
+      }
+      .button-container {
+        margin-bottom: 5px;
+      }
+      .search-container {
+        margin-bottom: 10px;
+      }
+      .search-container label {
+        margin-right: 5px;
+      }
+      #table{
+        background-color:#ccc;
+        border: 1px solid #333;
+        border-radius: 5px;
+      }
+      #table .tabulator-header {
+        background-color:#fff;
+        color:#03034B;
+      }
+      #table .tabulator-tableHolder .tabulator-table .tabulator-row{
+        color:#03034B;
+        background-color: #17202A;
+      }
+      #table .tabulator-table {
+        font-size: 12px;
+      }
+      #table .tabulator-header .tabulator-col .tabulator-col-title {
+        font-size: 12px;
+        color:#154360;
+      }
+      .link-button {
+        padding: 8px 16px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .link-button:hover {
+        background-color: #45a049;
+      }
+      .link-button:active {
+        background-color: #3e8e41;
+      }
+      .link-button2 {
+        padding: 8px 16px;
+        background-color: #2471A3;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .link-button2:hover {
+        background-color: #2471A3;
+      }
+      .link-button2d:active {
+        background-color: #3498DB;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div>
+      <button class="link-button2" onclick="navigateToData1()">Enquiry</button>
+      <button class="link-button2" onclick="navigateToData2()">Order</button>
+      <button class="link-button2" onclick="navigateToData3()">Indent</button>
+      <button class="link-button2" onclick="navigateToData4()">PO</button>
+      <button class="link-button2" onclick="navigateToData5()">Receive Material</button>
+      <button class="link-button2" onclick="navigateToData6()">Dispatch</button>
+      <button class="link-button2" onclick="navigateToData7()">IMS</button><br><br>
+    </div>
+
+    <div>
+      <label for="enquiryInput">Search by Enquiry No:</label>
+      <input type="text" id="enquiryInput" oninput="performSearch()" />
+      <label for="clientnameInput">Search by Client Name:</label>
+      <input type="text" id="clientnameInput" oninput="performSearch()" />
+    </div>
+
+    <div id="table"></div>
+
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.0/dist/js/tabulator.min.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", pageLoad);
+      var isScrolling = false;
+      function pageLoad() {
+        loadData();
+        var refreshParam = new URLSearchParams(window.location.search).get('refresh');
+        if (refreshParam === 'true') {
+          refreshData();
+        }
+        startAutoRefresh();
+        addScrollEventListeners();
+      }
+      function addScrollEventListeners() {
+        document.addEventListener("scroll", function (event) {
+          var scrollLeft = event.target.documentElement.scrollLeft;
+          if (scrollLeft === 0) {
+            isScrolling = false;
+          } else {
+            isScrolling = true;
+          }
+        });
+      }
+      function loadData() {
+        google.script.run
+          .withSuccessHandler((jsData) => {        
+            var table = new Tabulator("#table", {
+              frozenRows:0,
+              height: 570,
+              data: jsData,
+              pagination: true,
+              paginationSize: 20,
+              columns: [
+                {title:"Enquiry No", field:"Enquiry No",frozen: true},
+                {
+                  title:"Company Name",
+                  field:"Company Name",
+                  width:150,
+                  formatter: function(cell, formatterParams, onRendered) {
+                    var value = cell.getValue();
+                    var escapedValue = value.replace(/"/g, '&quot;'); // Escape double quotes for HTML attribute
+
+                    return '<div style="white-space: normal; word-wrap: break-word;">' + escapedValue + '</div>';
+                  }
+                },
+                {title:"Name", field:"Name",width:100,
+                formatter: function(cell, formatterParams, onRendered) {
+                    var value = cell.getValue();
+                    var escapedValue = value.replace(/"/g, '&quot;'); // Escape double quotes for HTML attribute
+
+                    return '<div style="white-space: normal; word-wrap: break-word;">' + escapedValue + '</div>';
+                  }
+                },
+                {title:"Contact No", field:"Contact No"},
+                {title:"E_Mail_Id", field:"E_Mail_Id"},
+                {
+                  title:"Requirement",
+                  field:"Requirement",
+                  width:250,
+                  formatter: function(cell, formatterParams, onRendered) {
+                    var value = cell.getValue();
+                    var escapedValue = value.replace(/"/g, '&quot;'); // Escape double quotes for HTML attribute
+
+                    return '<div style="white-space: normal; word-wrap: break-word;">' + escapedValue + '</div>';
+                  }
+                },
+                {
+                  title: "Enquiry File Upload",
+                  field: "Enquiry File Upload",
+                  width:100,
+                  formatter: function(cell, formatterParams, onRendered) {
+                    var link = cell.getValue();
+                    if (link) {
+                      return '<button class="link-button" onclick="window.open(\'' + link + '\', \'_blank\')">Link</button>';
+                    }
+                    return "";
+                  },
+                  cellClass: "link-cell"
+                },
+                {title:"Enquiry Recieve By", field:"Enquiry Recieve By"},
+                {
+                  title:"Planned",
+                  field:"Planned",
+                  width:100,
+                  formatter: function(cell, formatterParams, onRendered) {
+                    var value = cell.getValue();
+                    var escapedValue = value.replace(/"/g, '&quot;'); // Escape double quotes for HTML attribute
+                    return '<div style="white-space: normal; word-wrap: break-word;">' + escapedValue + '</div>';
+                  }
+                },
+                {
+                  title:"Step Name",
+                  field:"Step Name",
+                  width:250,
+                  formatter: function(cell, formatterParams, onRendered) {
+                    var value = cell.getValue();
+                    var escapedValue = value.replace(/"/g, '&quot;'); // Escape double quotes for HTML attribute
+
+                    return '<div style="white-space: normal; word-wrap: break-word;">' + escapedValue + '</div>';
+                  }
+                },
+                {title:"Step", field:"Step"},
+                {
+                  title: "Form Link",
+                  field: "Form_Link",
+                  width:80,
+                  formatter: function(cell, formatterParams, onRendered) {
+                    var link = cell.getValue();
+                    if (link) {
+                      return '<button class="link-button" onclick="window.open(\'' + link + '\', \'_blank\')">Link</button>';
+                    }
+                    return "";
+                  },
+                  cellClass: "link-cell"
+                },
+                {
+                  title: "Sales Close Data",
+                  field: "Sales Close Data",
+                  width:80,
+                  formatter: function(cell, formatterParams, onRendered) {
+                    var link = cell.getValue();
+                    if (link) {
+                      return '<button class="link-button" onclick="window.open(\'' + link + '\', \'_blank\')">Link</button>';
+                    }
+                    return "";
+                  },
+                  cellClass: "link-cell"
+                },
+                {
+                  title: "Status Done Link",
+                  field: "Status Done Link",
+                  formatter: function(cell, formatterParams, onRendered) {
+                    var link = cell.getValue();
+                    if (link) {
+                      return '<button class="link-button" onclick="window.open(\'' + link + '\', \'_blank\')">Link</button>';
+                    }
+                    return "";
+                  },
+                  cellClass: "link-cell"
+                }
+              ],
+              persistentLayout: true,
+              frozenColumns: true
+            });
+            // window.table = table;
+            // Assign the table instance to a global variable for access in other functions
+            window.table = table;
+          })
+          .withFailureHandler((er) => {
+            console.log("Failed to load data:", er);
+          })
+          .getData();
+      }
+      function performSearch() {
+        var enquiryInput = document.getElementById("enquiryInput").value.toLowerCase();
+        var clientnameInput = document.getElementById("clientnameInput").value.toLowerCase();
+
+        table.setFilter([
+          { field: "Enquiry No", type: "like", value: enquiryInput },
+          { field: "Company Name", type: "like", value: clientnameInput }
+        ]);
+      }
+      function navigateToData1() {
+        window.open("https://example.com/data1", "_blank");
+      }
+      function navigateToData2() {
+        window.open("https://example.com/data2", "_blank");
+      }
+      function navigateToData3() {
+        window.open("https://example.com/data3", "_blank");
+      }
+      function navigateToData4() {
+        window.open("https://example.com/data1", "_blank");
+      }
+      function navigateToData5() {
+        window.open("https://example.com/data2", "_blank");
+      }
+      function navigateToData6() {
+        window.open("https://example.com/data3", "_blank");
+      }
+      function navigateToData7() {
+        window.open("https://example.com/data3", "_blank");
+      }
+      function startAutoRefresh() {
+        setInterval(refreshData, 10000); // Refresh every 5 seconds (adjust as needed)
+      }
+      function refreshData() {
+        if (!isScrolling) {
+          google.script.run
+            .withSuccessHandler((jsData) => {
+              table.setData(jsData);
+            })
+            .withFailureHandler((er) => {
+              console.log("Failed to refresh data:", er);
+            })
+            .getData();
+        }
+      }
+    </script>
+  </body>
+</html>
