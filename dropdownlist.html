@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- <title>Product Price List</title> -->
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #010033;
+      color:"white";
+    }
+    .container .left {
+      /* flex: 0 0 calc(50% - 20px); Adjusted to occupy 50% of the available space minus the padding */
+      margin-left: 100px; /* Increased to create more space between the containers */
+      background-color: #ffffff;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      color:"white";
+    }
+
+    .container .right {
+      margin-right: 100px; /* Increased to create more space between the containers */
+
+      /* flex: 0 0 calc(50% - 20px); Adjusted to occupy 50% of the available space minus the padding */
+      background-color: #ffffff;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .form-label {
+        color: #FFFFFF; /* Replace with your desired font color */
+    }
+    h2.highlight {
+        background-color: #010033;
+        color:"white"; /* Replace with your desired highlight color */
+    }
+    h2 {
+      color:#ffffff;
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        table-layout: fixed;
+      }
+    th,
+    td {
+      border: 1px solid black;
+      padding: 8px;
+      text-align: left;
+      white-space: pre-wrap;
+      font-size: 15px;
+      font-family: Arial, sans-serif;
+    }
+
+    th {
+      background-color: #8CBCF8;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      font-size: 15px;
+      font-family: Arial, sans-serif;
+      color: #090C10; /* Added font color */
+    }
+
+    th:first-child,
+    td:first-child {
+      border-right: none;
+    }
+
+    /* Added styles for table row */
+    tr {
+      background-color: #fff;
+    }
+
+    tr:nth-child(odd) {
+      background-color: #C9E0FD;
+    }
+
+    /* Added styles for table row font color */
+    tr td {
+      color: #031922;
+    }
+    /* .pdf-download-button {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #4659FB;
+      color: #ffffff;
+      text-decoration: none;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+
+    .pdf-download-button:hover {
+      background-color: #3448D7;
+    } */
+
+
+  </style>
+  <div class="container left">
+    <h2 class="highlight">Product Price List:</h2>
+    <form>
+      <div class="mb-3">
+        <label for="item-category" class="form-label">Item Category</label>
+        <select id="item-category" class="form-select">
+          <option value="">Select Item Category</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label for="item-size" class="form-label">Item Size</label>
+        <select id="item-size" class="form-select">
+          <option value="">Select Item Size</option>
+        </select>
+      </div>
+      <div class="mt-3">
+        <!-- <h4>Item Details:</h4> -->
+        <div id="item-details"></div>
+      </div>
+    </form>
+  </div>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      google.script.run.withSuccessHandler(updateItemCategories).getItemCategories();
+    });
+
+    function updateItemCategories(itemCategories) {
+      var selectCategory = $('#item-category');
+      selectCategory.empty().append('<option value="">Select Item Category</option>');
+
+      const uniqueItemCategories = [...new Set(itemCategories)];
+
+      uniqueItemCategories.forEach(function(category) {
+        selectCategory.append('<option value="' + category + '">' + category + '</option>');
+      });
+    }
+
+    function updateItemSizes(itemSizes) {
+      var selectSize = $('#item-size');
+      selectSize.empty().append('<option value="">Select Item Size</option>');
+
+      itemSizes.forEach(function(size) {
+        selectSize.append('<option value="' + size + '">' + size + '</option>');
+      });
+    }
+
+    $('#item-category').change(function() {
+      var itemCategory = $('#item-category').val();
+      google.script.run.withSuccessHandler(updateItemSizes).getItemSizes(itemCategory);
+    });
+
+    $('#item-size').change(function() {
+      var itemCategory = $('#item-category').val();
+      var itemSize = $('#item-size').val();
+
+      google.script.run.withSuccessHandler(updateItemDetails).getItemDetails(itemCategory, itemSize);
+    });
+  </script>
+  <div class="container right">
+  <script>
+    function updateItemDetails(itemDetails) {
+      var itemDetailsHtml = '<table class="table"><tbody>';
+
+      var headers = [
+        'ITEM CATEGORY',
+        'ITEM SIZE',
+        'MAKE',
+        'MATERIAL',
+        'THICKNESS',
+        'OUTSIDE LACQUER',
+        'INSIDE LACQUER',
+        'QUANTITY PER PALLET',
+        'QUANTITY PER BOX',
+        'PALLETS PER 20FT',
+        'PALLETS PER FCL20FT',
+        'MOQ IN PALLETS',
+        'BOX PER FCL',
+        'QTY PER 20FT (CP)',
+        'PALLET / FCL',
+        'MOQ IN PALLETS',
+        'REF LME',
+        'LAST BASIC PRICE (1000 Pcs)',
+        'LAST PRICE (1000 Pcs)',
+        'CURRENT BASIC PRICE (1000 Pcs)',
+        'PALLET / FCL',
+        'INCO TERMS',
+        'ETP Material',
+        'PIGMET COAT (WH/AL)',
+        'RELEASE COAT (MRL/CRL)',
+        'BPA NI',
+        'VALIDITY',
+        'TOTAL PRICE',
+      ];
+
+      headers.forEach(function (header) {
+        if (itemDetails.hasOwnProperty(header)) {
+          itemDetailsHtml += '<tr><td><strong>' + header + ':</strong></td><td>' + itemDetails[header] + '</td></tr>';
+        }
+      });
+
+      itemDetailsHtml += '</tbody></table>';
+
+      $('#item-details').html(itemDetailsHtml);
+    }
+  </script>
+  </div>
+</body>
+</html>
